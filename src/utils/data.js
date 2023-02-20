@@ -83,22 +83,15 @@ export const searchQuery = (searchTerm) => {
         url
       }
     },
-    about,
-    category,
     _id,
-    title,
     destination,
     postedBy -> {
       _id,
       name,
       image
     },
-    save[] {
-      savedBy -> {
-      _id,
-      name,
-      image
-      },
+    wishlists[] -> {
+     _id,
     },
   }`;
 
@@ -118,12 +111,8 @@ export const feedQuery = `*[_type == "pins"] | order(_createdAt desc){
      name,
      image
     },
-    save[] {
-      savedBy -> {
-        _id,
-        name,
-        image
-      },
+    wishlists[] -> {
+      _id
     },
   }`; //new pins will be at the top
 
@@ -151,22 +140,10 @@ export const pinDetailQuery = (pinId) => {
       name,
       image
     },
-    save[] {
-      savedBy -> {
-        _id,
-        name,
-        image
-      },
+    wishlists[] -> {
+      _id
     },
-    comments[] {
-      comment,
-      postedBy -> {
-         _id,
-         name,
-         image
-        },
-      }
-    }`;
+  }`;
   return query;
 };
 
@@ -184,19 +161,15 @@ export const pinDetailMorePinQuery = (pin) => {
       name,
       image
     },
-    save[]{
-      savedBy->{
-        _id,
-        name,
-        image
-      },
+    wishlists[] -> {
+      _id
     },
   }`;
   return query;
 };
 
 export const userCreatedPinsQuery = (userId) => {
-  const query = `*[_type == 'pins' && userId == '${userId}'] | order(_createdAt desc){
+  const query = `*[_type == 'pins' && postedBy->_id == '${userId}'] | order(_createdAt desc){
     image{
       asset->{
         url
@@ -209,12 +182,8 @@ export const userCreatedPinsQuery = (userId) => {
       name,
       image
     },
-    save[]{
-      savedBy->{
-        _id,
-        name,
-        image
-      },
+    wishlists[]->{
+      _id
     },
   }`;
   return query;
@@ -224,7 +193,7 @@ export const userCreatedPinsQuery = (userId) => {
 // So it will fetch the details from the referenced document
 
 export const userSavedPinsQuery = (userId) => {
-  const query = `*[_type == 'pins' && '${userId}' in save[].userId ] | order(_createdAt desc) {
+  const query = `*[_type == 'pins' && '${userId}' in wishlists[]->_id ] | order(_createdAt desc) {
     image{
       asset->{
         url
@@ -237,13 +206,22 @@ export const userSavedPinsQuery = (userId) => {
       name,
       image
     },
-    save[]{
-      savedBy->{
-        _id,
-        name,
-        image
-      },
+    wishlists[]->{
+      _id
     },
+  }`;
+  return query;
+};
+
+export const getCommentsQuery = (pinId) => {
+  const query = `*[_type == 'comments' && pinId._ref == '${pinId}'] | order(_createdAt desc){
+    _id,
+    postedBy->{
+      _id,
+      image,
+      name
+    },
+    comment
   }`;
   return query;
 };

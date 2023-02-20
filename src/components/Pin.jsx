@@ -3,18 +3,18 @@ import { useNavigate, Link } from "react-router-dom";
 import { client, urlFor } from "../utils/client";
 import { v4 as uuidv4 } from "uuid";
 import { MdDownloadForOffline } from "react-icons/md";
-import { AiTwotoneDelete } from "react-icons/ai";
+import { AiTwotoneDelete,AiOutlineHeart,AiFillHeart } from "react-icons/ai";
 import { BsFillArrowUpCircleFill } from "react-icons/bs";
 import { fetchUser } from "../utils/fetchUser.js";
 import { userQuery } from "../utils/data.js";
 
-const Pin = ({ pin: { postedBy, image, _id, destination, save } }) => {
+const Pin = ({ pin: {_id, image, postedBy, destination, wishlists } }) => {
   const [postHovered, setPostHovered] = useState(false);
   const [savingPin, setSavingPin] = useState(false);
   const userId = fetchUser();
   const navigate = useNavigate();
 
-  const alreadySaved = !!save?.filter((item) => item.savedBy?._ref === userId)
+  const alreadySaved = !!wishlists?.filter((item) => item?._id === userId)
     ?.length;
   //  id:1 and savedBy:[4,1,5] => [1] => 1 => !1 => false => !false => true
   //  id:6 and savedBy:[4,1,5] => [] => 0 => !0 => true => !true => false
@@ -23,15 +23,12 @@ const Pin = ({ pin: { postedBy, image, _id, destination, save } }) => {
       setSavingPin(true);
       client
         .patch(id)
-        .setIfMissing({ save: [] })
-        .insert("after", "save[-1]", [
+        .setIfMissing({ wishlists: [] })
+        .insert("after", "wishlists[-1]", [
           {
             _key: uuidv4,
-            userId: userId,
-            savedBy: {
-              _type: "reference",
-              _ref: userId,
-            },
+            _type: "reference",
+            _ref: userId,
           },
         ])
         .commit()
@@ -79,7 +76,7 @@ const Pin = ({ pin: { postedBy, image, _id, destination, save } }) => {
                   type="button"
                   className="bg-red-500 opacity-70 hover:opacity-100 text-white font-bold px-5 py-1 text-base rounded-3xl hover:shadow-md outline-none"
                 >
-                  {save?.length} Saved
+                  <AiFillHeart fontSize={24}/>
                 </button>
               ) : (
                 <button
@@ -90,7 +87,7 @@ const Pin = ({ pin: { postedBy, image, _id, destination, save } }) => {
                   }}
                   className="bg-red-500 opacity-70 hover:opacity-100 text-white font-bold px-5 py-1 text-base rounded-3xl hover:shadow-md outline-none"
                 >
-                  Save
+                  <AiOutlineHeart fontSize={24}/>
                 </button>
               )}
             </div>

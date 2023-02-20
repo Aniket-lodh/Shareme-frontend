@@ -15,6 +15,7 @@ const Search = ({ searchTerm }) => {
       client.fetch(query).then((data) => {
         setPins(data);
         setLoading(false);
+        console.log(data);
       });
      
     } else {

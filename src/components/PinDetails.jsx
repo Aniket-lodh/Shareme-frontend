@@ -1,24 +1,20 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
 import { client } from "../utils/client.js";
 import MasonryLayout from "./MasonryLayout.jsx";
 import { pinDetailMorePinQuery, pinDetailQuery } from "../utils/data";
-import Spinner, { Loader } from "./Spinner.jsx";
-import CommentsList from "./commentsList.jsx";
+import Spinner from "./Spinner.jsx";
 import { AiOutlineLike, AiOutlineDislike } from "react-icons/ai";
 import { RiShareForwardLine, RiPlayListAddLine } from "react-icons/ri";
 import { HiOutlineDownload } from "react-icons/hi";
+import { Comments } from "../container/Comments.jsx";
 
 const PinDetails = ({ user }) => {
   const [pins, setPins] = useState([]);
   const [pinDetails, setPinDetails] = useState(null);
-  const [addingComment, setAddingComment] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingComments, setIsLoadingComments] = useState(false);
 
   const { pinId } = useParams();
-  const commentRef = useRef(null);
 
   const fetchPinDetails = async () => {
     let query = pinDetailQuery(pinId);
@@ -36,39 +32,6 @@ const PinDetails = ({ user }) => {
         }
       });
     }
-  };
-
-  const addComment = async () => {
-    if (
-      commentRef.current.value !== undefined &&
-      commentRef.current.value !== "" &&
-      commentRef.current.value !== null
-    ) {
-      setAddingComment(true);
-      await client
-        .patch(pinId)
-        .setIfMissing({ comments: [] })
-        .insert("after", "comments[-1]", [
-          {
-            comment: commentRef.current.value,
-            _key: `${uuidv4()}`,
-            postedBy: {
-              _type: "reference",
-              _ref: user._id,
-            },
-          },
-        ])
-        .commit()
-        .then(() => {
-          setIsLoadingComments(true);
-          commentRef.current.value = null;
-
-          fetchPinDetails().then(() => {
-            setAddingComment(false);
-            setIsLoadingComments(false);
-          });
-        });
-    } else setAddingComment(false);
   };
 
   useEffect(() => {
@@ -102,22 +65,30 @@ const PinDetails = ({ user }) => {
             <h1 className="text-4xl font-bold break-words mt-3">
               {pinDetails?.title}
             </h1>
-            <p className="mt-3">{pinDetails?.about}</p>
+            <div className="flex items-center justice-center gap-3 h-fit  mt-3">
+              <Link
+                to={`/user-profile/${pinDetails?.postedBy?._id}`}
+                className="flex gap-2 items-center bg-white rounded-lg w-fit hover:text-blue-700 transition-all"
+              >
+                <img
+                  referrerPolicy="no-referrer"
+                  src={pinDetails?.postedBy?.image}
+                  alt="pin-creator"
+                  className="w-11 h-11 rounded-full object-cover border"
+                />
+                <p className="font-medium capitalize text-base">
+                  {pinDetails?.postedBy?.name}
+                </p>
+              </Link>
+              <button
+                type="button"
+                className=" capitalize px-4 py-2 text-base sm:text-lg bg-red-500 rounded-full font-semibold text-slate-100 hover:bg-red-600 hover:text-slate-50 transition-all"
+              >
+                follow
+              </button>
+            </div>
           </div>
-          <Link
-            to={`/user-profile/${pinDetails?.postedBy?._id}`}
-            className="flex gap-2 mt-3 items-center bg-white rounded-lg w-fit hover:text-blue-700 transition-all"
-          >
-            <img
-              referrerPolicy="no-referrer"
-              src={pinDetails?.postedBy?.image}
-              alt="pin-creator"
-              className="w-11 h-11 rounded-full object-cover border"
-            />
-            <p className="font-medium capitalize text-base">
-              {pinDetails?.postedBy?.name}
-            </p>
-          </Link>
+          <p className="mt-3">{pinDetails?.about}</p>
 
           <div className="w-full mt-3 flex items-start gap-3 flex-wrap">
             <div className="divide-x flex items-center justify-center rounded-lg bg-gray-100 text-base">
@@ -157,56 +128,8 @@ const PinDetails = ({ user }) => {
               </a>
             </div>
           </div>
-
-          <div className="bg-gray-100 mt-3 px-2 pb-3 rounded-xl rounded-b-5xl flex flex-col items-start justify-between h-fit w-full">
-            <details className="w-full">
-              <summary className="mt-5 text-2xl mb-2 cursor-pointer ">
-                {pinDetails?.comments ? pinDetails?.comments.length : "0"}{" "}
-                Comments
-              </summary>
-              <div className="max-h-370 w-full overflow-y-auto scrollbar-hidden px-3 pb-4">
-                {isLoadingComments && (
-                  <Spinner message={"loading comments..."} />
-                )}
-
-                {!isLoadingComments &&
-                  pinDetails?.comments &&
-                  pinDetails?.comments.map((comment, index) => (
-                    <div key={index} className="w-full">
-                      <CommentsList
-                        comment={comment}
-                        index={index}
-                        user={user}
-                      />
-                    </div>
-                  ))}
-                {!isLoadingComments && !pinDetails?.comments && (
-                  <div className="flex w-full items-center justify-center mt-6">
-                    <p className="text-xl font-medium">No Comments</p>
-                  </div>
-                )}
-              </div>
-            </details>
-{/* TODO: fix the post comment button layout for mobile devices */}
-            <div className="sticky bg-white -bottom-2 rounded-full px-4 py-3 flex gap-3 items-center justify-center w-full drop-shadow-md">
-              <input
-                type="text"
-                className="w-3/5 flex-auto border-gray-100 outline-none border-2 p-2 rounded-2xl focus:border-gray-300"
-                placeholder="Add a comment"
-                ref={commentRef}
-                onKeyDown={(e) => {
-                  if (e.code === "Enter") addComment();
-                }}
-              />
-              <button
-                type="button"
-                className="w-1/5 md:w-auto flex-initial bg-red-500 text-white rounded-full px-3 py-2 font-semibold text-base outline-none"
-                onClick={addComment}
-              >
-                {addingComment ? <Loader /> : "post"}
-              </button>
-            </div>
-          </div>
+          {/* Comments Lists */}
+          <Comments pinId={pinId} user={user}/>
         </div>
       </div>
 

@@ -3,11 +3,13 @@ import { MdDelete } from "react-icons/md";
 import { AiTwotoneEdit } from "react-icons/ai";
 import { useEffect, useRef, useState } from "react";
 import { client } from "../utils/client.js";
+import { Loader } from "./Spinner.jsx";
 
-const CommentsList = ({ comment, index, user }) => {
+const CommentsList = ({ comment, user, delComment }) => {
   const [isHoveringComment, setIsHoveringComment] = useState(false);
   const [isSettingActive, setIsSettingActive] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isConfDeleting, setIsConfDeleting] = useState(false);
   const settingsRef = useRef(null);
 
   useEffect(() => {
@@ -28,10 +30,7 @@ const CommentsList = ({ comment, index, user }) => {
 
   return (
     <>
-      <div
-        className="w-full h-fit pl-2 py-2 pr-1 flex gap-2 mt-4 items-center bg-white rounded-lg sm:py-1"
-        key={index}
-      >
+      <div className="w-full h-fit pl-2 py-2 pr-1 flex gap-2 mt-4 items-center bg-white rounded-lg sm:py-1">
         <img
           referrerPolicy="no-referrer"
           src={comment?.postedBy?.image}
@@ -97,7 +96,7 @@ const CommentsList = ({ comment, index, user }) => {
             </h3>
             <p className="py-3 text-base text-gray-700 font-medium">
               Once you delete this comment, you can no longer view, edit or
-              recover it.{" "}
+              recover it.
             </p>
             <div className="w-full flex items-center justify-between pt-3">
               <button
@@ -110,8 +109,22 @@ const CommentsList = ({ comment, index, user }) => {
               >
                 No, Keep it
               </button>
-              <button className="px-3 py-2 bg-red-500 rounded-md transition-all text-white outline  outline-offset-0 outline-white active:outline-orange-red-500 hover:outline-orange-500 hover:outline-offset-2 focus:outline-orange-red-500">
-                Delete it now!
+              <button
+                onClick={async () => {
+                  if (comment && !isConfDeleting) {
+                    setIsConfDeleting(true);
+                    await delComment(comment._id);
+                    setIsConfDeleting(false);
+                    setIsHoveringComment(false);
+                    setIsDeleting(false);
+                    setIsSettingActive(false);
+                  }
+                }}
+                className={
+                  "px-3 py-2 bg-red-500 rounded-md transition-all text-white outline  outline-offset-0 outline-white active:outline-orange-red-500 hover:outline-orange-500 hover:outline-offset-2 focus:outline-orange-red-500"
+                }
+              >
+                {isConfDeleting ? <Loader /> : "Delete it now!"}
               </button>
             </div>
           </div>
