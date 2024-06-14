@@ -15,7 +15,7 @@ function App() {
   }, []);
 
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_API_TOKEN}>
+    <GoogleOAuthProvider clientId={import.meta.env.GOOGLE_API_TOKEN}>
       <Routes>
         <Route path="*" element={<Home />} />
         <Route path="login" element={<Login />} />
