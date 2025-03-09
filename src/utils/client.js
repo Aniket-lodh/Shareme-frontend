@@ -1,14 +1,13 @@
 import sanityClient from "@sanity/client";
 import imageUrlBuilder from "@sanity/image-url";
-
-const isDevelopment = import.meta.env.VITE_APP_MODE === "development";
+import { config } from './variables';
 
 export const client = sanityClient({
-  projectId: `${import.meta.env.VITE_SERVER_PROJECT_ID}`,
+  projectId: `${config.sanityProjectId}`,
   dataset: "production",
   apiVersion: "2023-01-17",
-  useCdn: !isDevelopment, // true if you want to get cached fast responses
-  token: `${import.meta.env.VITE_SERVER_TOKEN}`,
+  useCdn: !config.isDevelopment, // true if you want to get cached fast responses
+  token: `${config.serverToken}`,
 });
 
 const builder = imageUrlBuilder(client);

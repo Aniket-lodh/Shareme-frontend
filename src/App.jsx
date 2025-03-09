@@ -7,6 +7,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { fetchUser } from "./utils/fetchUser";
 import { ToastProvider } from './context/Toast';
 import { Toaster } from "react-hot-toast";
+import { config } from './utils/variables';
 
 function App() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ function App() {
   }, []);
 
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_API_TOKEN}>
+    <GoogleOAuthProvider clientId={config.googleClientId}>
       <ToastProvider>
         <Toaster
           position="top-center"

@@ -4,6 +4,7 @@ import jwt_decode from "jwt-decode";
 import { GoogleLogin } from "@react-oauth/google";
 import { client } from "../utils/client";
 import { useToast } from "../context/Toast";
+import { config } from "../utils/variables";
 
 // lazy loading video and images.
 const shareVideo = new URL("../assets/share.mp4", import.meta.url).href;
@@ -37,10 +38,13 @@ const Login = () => {
     [navigate, toast]
   );
 
-  const handleError = useCallback((error) => {
-    console.error("Google OAuth Error:", error);
-    toast.error("Google signin failed, please try again!");
-  }, [toast]);
+  const handleError = useCallback(
+    (error) => {
+      console.error("Google OAuth Error:", error);
+      toast.error("Google signin failed, please try again!");
+    },
+    [toast]
+  );
 
   return (
     <div className="flex justify-start items-center flex-col h-screen">
@@ -66,7 +70,7 @@ const Login = () => {
           </div>
           <div className="shadow-2xl">
             <GoogleLogin
-              clientId={import.meta.env.VITE_GOOGLE_API_TOKEN}
+              clientId={config.googleClientId}
               onSuccess={(resp) => createOrGetuser(resp)}
               onError={handleError}
             />
