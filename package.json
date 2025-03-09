@@ -1,5 +1,5 @@
 {
-  "name": "socialmedia",
+  "name": "shareme",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,6 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   },
   "dependencies": {
     "@react-oauth/google": "^0.6.0",
@@ -16,6 +20,7 @@
     "jwt-decode": "^3.1.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.5.2",
     "react-icons": "^4.7.1",
     "react-loader-spinner": "^5.3.4",
     "react-masonry-css": "^1.0.16",

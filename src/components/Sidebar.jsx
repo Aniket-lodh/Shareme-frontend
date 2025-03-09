@@ -1,82 +1,114 @@
-import React from "react";
+import { memo } from "react";
 import { NavLink, Link } from "react-router-dom";
-import { RiHomeFill } from "react-icons/ri";
-import { IoIosArrowForward } from "react-icons/io";
+import { RiHomeFill, RiUserLine } from "react-icons/ri";
+import { IoCompassOutline } from "react-icons/io5";
 import logo from "../assets/logo.png";
 import { categories } from "../utils/data";
-const isNotActiveStyle =
-  "flex items-center px-5 gap-3 text-gray-500 hover:text-black transition-all ease-in-out duration-40 capitalize";
-const isActiveStyle =
-  "flex items-center px-5 gap-3 font-extrabold border-r-2 boder-black transition-all ease-in-out duration-40 capitalize";
 
-const Sidebar = ({ user, closeToggle }) => {
-  const handleCloseSidebar = () => {
-    if (closeToggle) closeToggle(false);
-  };
+const navStyles = {
+  base: "flex items-center px-5 py-2 gap-3 transition-all duration-200 ease-in-out rounded-lg mx-2",
+  active: "bg-gray-100 text-black font-medium",
+  inactive: "text-gray-500 hover:bg-gray-50 hover:text-gray-900",
+};
+
+const Sidebar = memo(({ user, closeToggle }) => {
+  const handleCloseSidebar = () => closeToggle?.(false);
+
   return (
-    <div className="flex flex-col h-screen bg-white min-w-210 ">
-      <div className="flex h-full flex-col justify-between" >
+    <aside className="flex flex-col h-screen bg-white border-r border-gray-100 w-64 select-none">
+      <div className="flex flex-col flex-1 overflow-hidden">
+        {/* Logo */}
         <Link
           to="/"
-          className="flex px-5 gap-2 my-6 pt-1 w-190 items-center"
+          className="flex px-5 py-4 items-center"
           onClick={handleCloseSidebar}
         >
-          <img src={logo} alt="logo" className="w-full" />
+          <img
+            src={logo}
+            alt="ShareMe Logo"
+            className="h-8 object-contain"
+            loading="eager"
+          />
         </Link>
-        <div className="flex flex-col gap-5" style={{'height':'77%'}}>
+
+        {/* Navigation */}
+        <nav className="flex-1 space-y-1 px-3 py-2">
           <NavLink
             to="/"
             className={({ isActive }) =>
-              isActive ? isActiveStyle : isNotActiveStyle
+              `${navStyles.base} ${
+                isActive ? navStyles.active : navStyles.inactive
+              }`
             }
             onClick={handleCloseSidebar}
           >
-            <RiHomeFill />
-            home
+            <RiHomeFill className="w-5 h-5" />
+            <span>Home</span>
           </NavLink>
-          <h3 className="capitalize mt-2 px-5 text-base 2xl:text-xl">
-            discover categories
-          </h3>
-          <div className="flex overflow-y-auto hide-scrollbar flex-col gap-5">
-            {categories.map((item, id) => (
-              <NavLink
-                to={`/category/${item.name}`}
-                className={({ isActive }) =>
-                  isActive ? isActiveStyle : isNotActiveStyle
-                }
-                onClick={handleCloseSidebar}
-                key={id}
-              >
-                <img
-                  src={item.image}
-                  alt="category-item"
-                  className="w-8 rounded-full h-8 shadow-sm"
-                />
-                {item.name}
-              </NavLink>
-            ))}
-            
+
+          {/* Categories Section */}
+          <div className="mt-8">
+            <div className="px-3 mb-4 flex items-center">
+              <IoCompassOutline className="w-5 h-5 text-gray-400" />
+              <h3 className="ml-2 text-sm font-medium text-gray-600">
+                Discover Categories
+              </h3>
+            </div>
+
+            <div className="space-y-1 max-h-[calc(100vh-350px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
+              {categories.map((category) => (
+                <NavLink
+                  key={category.name}
+                  to={`/category/${category.name}`}
+                  className={({ isActive }) =>
+                    `${navStyles.base} ${
+                      isActive ? navStyles.active : navStyles.inactive
+                    }`
+                  }
+                  onClick={handleCloseSidebar}
+                >
+                  <img
+                    src={category.image}
+                    alt={category.name}
+                    className="w-6 h-6 rounded-lg object-cover"
+                    loading="lazy"
+                  />
+                  <span className="capitalize text-sm">{category.name}</span>
+                </NavLink>
+              ))}
+            </div>
           </div>
-          
-        </div>
+        </nav>
+
+        {/* User Profile */}
         {user && (
-              <Link
-                to={`user-profile/${user._id}`}
-                className="flex h-14 items-center my-5 mb-3 gap-2 p-2 bg-white rounded-lg shadow-lg mx-3"
-                onClick={handleCloseSidebar}
-              >
-                <img
-                  referrerPolicy="no-referrer"
-                  src={user?.image}
-                  className="rounded-full w-10 h-10"
-                  alt="user-profile"
-                />
-                <p>{user.name}</p>
-              </Link>
-            )}
+          <div className="border-t border-gray-100 p-4">
+            <Link
+              to={`user-profile/${user._id}`}
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+              onClick={handleCloseSidebar}
+            >
+              <img
+                src={user.image}
+                className="w-8 h-8 rounded-full object-cover"
+                alt={user.name}
+                referrerPolicy="no-referrer"
+                loading="lazy"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {user.name}
+                </p>
+              </div>
+              <RiUserLine className="w-5 h-5 text-gray-400" />
+            </Link>
+          </div>
+        )}
       </div>
-    </div>
+    </aside>
   );
-};
+});
+
+Sidebar.displayName = "Sidebar";
 
 export default Sidebar;

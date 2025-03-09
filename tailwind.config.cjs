@@ -84,26 +84,42 @@ module.exports = {
             transform: "translateZ(160px)",
           },
         },
+        fade: {
+          "0%, 100%": { opacity: 1 },
+          "50%": { opacity: 0.5 },
+        },
+        scale: {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(0.20)" },
+        },
+        gradient: {
+          "0%, 100%": { "background-position": "0% 50%" },
+          "50%": { "background-position": "100% 50%" },
+        },
       },
       animation: {
         "slide-in": "slide-in 0.5s ease-out",
         "slide-fwd":
           " slide-fwd 0.45s cubic-bezier(0.250, 0.460, 0.450, 0.940) both",
+        fade: "fade 1.2s linear infinite",
+        scale: "scale 1.2s linear infinite",
+        gradient: "gradient 8s linear infinite",
       },
       transitionProperty: {
         height: "height",
       },
-      borderRadius:{
-        "4xl":"2rem",
-        "5xl":"2.5rem",
-      }
-      
+      borderRadius: {
+        "4xl": "2rem",
+        "5xl": "2.5rem",
+      },
+      scale: {
+        102: "1.02",
+      },
     },
     cursor: {
       "zoom-in": "zoom-in",
       pointer: "pointer",
     },
-    
   },
   variants: {
     // backgroundColor: ['active'],
@@ -118,6 +134,20 @@ module.exports = {
         ".scrollbar-hidden": {
           "-ms-overflow-style": "none",
           "scrollbar-width": "none",
+        },
+        ".custom-scrollbar": {
+          "&::-webkit-scrollbar": {
+            width: "4px",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: "transparent",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            background: "#E5E7EB",
+            borderRadius: "4px",
+          },
+          "scrollbar-width": "thin",
+          "scrollbar-color": "#E5E7EB transparent",
         },
       });
     }),
