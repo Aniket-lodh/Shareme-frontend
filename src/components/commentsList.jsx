@@ -2,7 +2,6 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { MdDelete } from "react-icons/md";
 import { AiTwotoneEdit } from "react-icons/ai";
 import { useEffect, useRef, useState } from "react";
-import { client } from "../utils/client.js";
 import { Loader } from "./Spinner.jsx";
 
 const CommentsList = ({ comment, user, delComment }) => {
@@ -26,16 +25,14 @@ const CommentsList = ({ comment, user, delComment }) => {
     };
   }, [settingsRef]);
 
-  // TODO: Implement the delete api
-
   return (
     <>
-      <div className="w-full h-fit pl-2 py-2 pr-1 flex gap-2 mt-4 items-center bg-white rounded-lg sm:py-1">
+      <div className="w-full h-fit pl-2 py-2 pr-1 flex gap-2 items-center bg-white rounded-lg sm:py-1">
         <img
           referrerPolicy="no-referrer"
           src={comment?.postedBy?.image}
           alt="user-profile"
-          className="w-10 h-10 border rounded-full cursor-pointer"
+          className="w-8 h-8 border rounded-full cursor-pointer"
         />
         <div
           className="relative flex flex-row transition-all items-center justify-between w-full"
@@ -44,11 +41,11 @@ const CommentsList = ({ comment, user, delComment }) => {
             if (!isSettingActive) setIsHoveringComment(false);
           }}
         >
-          <div className="flex flex-col w-full h-fit items-start w-10/12">
-            <p className="font-bold cursor-pointer">
+          <div className="flex flex-col w-full h-fit items-start">
+            <p className="font-bold text-sm cursor-pointer">
               {comment?.postedBy?.name}
             </p>
-            <p className="text-sm md:text-base text-gray-600">
+            <p className="text-xs md:text-sm text-gray-600">
               {comment?.comment}
             </p>
           </div>
@@ -61,25 +58,25 @@ const CommentsList = ({ comment, user, delComment }) => {
           )}
           {isSettingActive && (
             <div
-              className="w-fit h-fit flex rounded-md cursor-pointer shadow-md flex-col items-center justify-center border bg-white absolute top-50 right-10"
+              className="absolute top-0 right-10 w-fit h-fit flex rounded-md cursor-pointer shadow-sm flex-col items-center justify-center border border-gray-400 overflow-hidden"
               ref={settingsRef}
             >
               <div
-                className="pt-2 pb-1 px-2 border-b w-full h-fit flex items-center justify-center gap-1 transition-all hover:bg-gray-100 "
+                className="group pt-2 pb-1 px-2 border-b border-gray-400 w-full h-fit flex items-center justify-center gap-1 transition-all hover:bg-gray-50"
                 onClick={() => setIsDeleting(true)}
               >
                 <MdDelete
                   fontSize={24}
-                  className="hover:text-red-500 transition-all"
+                  className="group-hover:text-red-400 transition-all"
                 />
-                <p className="w-full block text-center">Delete</p>
+                <p className="w-full block text-start text-sm">Delete</p>
               </div>
-              <div className="pt-2 pb-1 px-2 w-full h-fit flex items-center justify-center gap-1 transition-all hover:bg-gray-100">
+              <div className="group pt-2 pb-1 px-2 w-full h-fit flex items-center justify-center gap-1 transition-all hover:bg-gray-50">
                 <AiTwotoneEdit
                   fontSize={24}
-                  className="hover:text-blue-700 transition-all"
+                  className="group-hover:text-blue-700 transition-all"
                 />
-                <p className="w-full block text-center">Edit</p>
+                <p className="w-full block text-start text-sm">Edit</p>
               </div>
             </div>
           )}
@@ -134,4 +131,3 @@ const CommentsList = ({ comment, user, delComment }) => {
   );
 };
 export default CommentsList;
-// TODO: continue the delete method implementation

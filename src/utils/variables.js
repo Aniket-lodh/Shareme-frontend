@@ -7,7 +7,6 @@ const getEnvVar = (key, defaultValue = "") => {
   const value = import.meta.env[key];
   if (value) return value;
 
-
   // Log warning if no value found and no default provided
   if (defaultValue === "") {
     console.warn(

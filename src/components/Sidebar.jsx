@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { NavLink, Link } from "react-router-dom";
+import { NavLink, Link, useSearchParams } from "react-router-dom";
 import { RiHomeFill, RiUserLine } from "react-icons/ri";
 import { IoCompassOutline } from "react-icons/io5";
 import logo from "../assets/logo.png";
@@ -12,7 +12,12 @@ const navStyles = {
 };
 
 const Sidebar = memo(({ user, closeToggle }) => {
-  const handleCloseSidebar = () => closeToggle?.(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const handleCloseSidebar = () => {
+    setSearchParams({});
+    closeToggle?.(false);
+  };
 
   return (
     <aside className="flex flex-col h-screen bg-white border-r border-gray-100 w-64 select-none">

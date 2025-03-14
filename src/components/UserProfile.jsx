@@ -182,11 +182,7 @@ const UserProfile = () => {
         {userId === fetchUser() && (
           <button
             onClick={() => navigate("/create-pin")}
-            className="px-5 py-3 rounded-xl font-medium
-        bg-gray-900 text-white 
-        hover:bg-gray-800 shadow-lg
-        transition-all duration-200
-        flex items-center gap-2"
+            className="px-5 py-3 rounded-xl font-medium bg-gray-900 text-white  hover:bg-gray-800 shadow-lg transition-all duration-200 flex items-center gap-2"
           >
             <span>Create Pin</span>
             <svg

@@ -1,14 +1,31 @@
-import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Routes, Route, useSearchParams, useLocation } from "react-router-dom";
 import { Navbar, Feed, PinDetails, CreatePin, Search } from "../components";
 
 const Pins = ({ user }) => {
   const [searchItem, setSearchItem] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  
+  useEffect(() => {
+    // Clear search when not on search page
+    if (!location.pathname.includes("/search")) {
+      setSearchItem("");
+      setSearchParams({});
+    } else {
+      const searchQuery = searchParams.get("query") || "";
+      setSearchItem(searchQuery);
+    }
+  }, [location.pathname, searchParams, setSearchParams]);
 
   return (
     <div className="px-2 md:px-5">
       <div className="bg-gray-50">
-        <Navbar searchTerm={searchItem} setSearchTerm={setSearchItem} user={user}/>
+        <Navbar
+          searchTerm={searchItem}
+          setSearchTerm={setSearchItem}
+          user={user}
+        />
       </div>
       <div className="h-full">
         <Routes>
