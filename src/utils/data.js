@@ -172,6 +172,20 @@ export const pinDetailQuery = (pinId) => {
     wishlists[] -> {
       _id
     },
+    likes[]-> {
+      _id,
+      name,
+      image
+    },
+    dislikes[]-> {
+      _id,
+      name,
+      image
+    },
+    likesCount,
+    dislikesCount,
+    sharesCount,
+    downloadCount
   }`;
   return query;
 };

@@ -9,12 +9,24 @@ import { RiShareForwardLine, RiPlayListAddLine } from "react-icons/ri";
 import { HiOutlineDownload } from "react-icons/hi";
 import { Comments } from "../container/Comments.jsx";
 import { MdClose } from "react-icons/md";
+import { v4 as uuidv4 } from "uuid";
+import { TbLoader2 } from "react-icons/tb";
 
 const PinDetails = ({ user }) => {
   const [pins, setPins] = useState([]);
   const [pinDetails, setPinDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const [isLiking, setIsLiking] = useState(false);
+  const [isDisliking, setIsDisliking] = useState(false);
+
+  const hasLiked = pinDetails?.likes?.some((like) => like._id === user?._id);
+  const hasDisliked = pinDetails?.dislikes?.some(
+    (dislike) => dislike._id === user?._id
+  );
+
   const { pinId } = useParams();
 
   const fetchPinDetails = async () => {
@@ -32,6 +44,168 @@ const PinDetails = ({ user }) => {
           });
         }
       });
+    }
+  };
+
+  const handleLike = async () => {
+    if (!user || isLiking || isDisliking) return;
+    setIsLiking(true);
+
+    try {
+      let mutation;
+      if (hasLiked) {
+        // Unlike
+        mutation = client
+          .patch(pinDetails._id)
+          .unset([`likes[_ref=="${user._id}"]`])
+          .setIfMissing({ likesCount: 0 })
+          .dec({ likesCount: 1 });
+      } else {
+        // Like and remove dislike if exists
+        mutation = client
+          .patch(pinDetails._id)
+          .setIfMissing({ likes: [], likesCount: 0, dislikesCount: 0 })
+          .insert("after", "likes[-1]", [
+            {
+              _key: uuidv4(),
+              _type: "reference",
+              _ref: user._id,
+            },
+          ])
+          .inc({ likesCount: 1 })
+          .unset([`dislikes[_ref=="${user._id}"]`])
+          .dec({ dislikesCount: hasDisliked ? 1 : 0 });
+      }
+
+      await mutation.commit();
+      const updatedPin = await client.fetch(pinDetailQuery(pinDetails._id));
+      setPinDetails(updatedPin[0]);
+    } catch (error) {
+      console.error("Error updating like:", error);
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  const handleDislike = async () => {
+    if (!user || isDisliking || isLiking) return;
+    setIsDisliking(true);
+    try {
+      let mutation;
+      if (hasDisliked) {
+        // Undislike
+        mutation = client
+          .patch(pinDetails._id)
+          .unset([`dislikes[_ref=="${user._id}"]`])
+          .setIfMissing({ dislikesCount: 0 })
+          .dec({ dislikesCount: 1 });
+      } else {
+        // disLike and remove like if exists
+        mutation = client
+          .patch(pinDetails._id)
+          .setIfMissing({ dislikes: [], likesCount: 0, dislikesCount: 0 })
+          .insert("after", "dislikes[-1]", [
+            {
+              _key: uuidv4(),
+              _type: "reference",
+              _ref: user._id,
+            },
+          ])
+          .inc({ dislikesCount: 1 })
+          .unset([`likes[_ref=="${user._id}"]`])
+          .dec({ likesCount: hasLiked ? 1 : 0 });
+      }
+
+      await mutation.commit();
+      const updatedPin = await client.fetch(pinDetailQuery(pinDetails._id));
+      setPinDetails(updatedPin[0]);
+    } catch (error) {
+      console.error("Error updating dislike:", error);
+    } finally {
+      setIsDisliking(false);
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      // Share logic using Web Share API
+      if (navigator.share) {
+        await navigator.share({
+          title: pinDetails.title,
+          text: pinDetails.about,
+          url: window.location.href,
+        });
+
+        // Update share count
+        const mutation = client
+          .patch(pinDetails._id)
+          .setIfMissing({ sharesCount: 0 })
+          .inc({ sharesCount: 1 });
+
+        await mutation.commit();
+        const updatedPin = await client.fetch(pinDetailQuery(pinDetails._id));
+        setPinDetails(updatedPin[0]);
+      }
+    } catch (error) {
+      console.error("Error sharing:", error);
+    }
+  };
+
+  const handleDownload = async (e) => {
+    e.preventDefault();
+    if (isDownloading) return;
+
+    try {
+      setIsDownloading(true);
+      // Fetch image as blob
+      const response = await fetch(pinDetails?.image.asset?.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      // Create XHR to track progress
+      const xhr = new XMLHttpRequest();
+      xhr.responseType = "blob";
+
+      xhr.addEventListener("load", async () => {
+        console.log("Download completed");
+        try {
+          const mutation = client
+            .patch(pinDetails._id)
+            .setIfMissing({ downloadCount: 0 })
+            .inc({ downloadCount: 1 });
+
+          await mutation.commit();
+          const updatedPin = await client.fetch(pinDetailQuery(pinDetails._id));
+          setPinDetails(updatedPin[0]);
+        } catch (error) {
+          console.error("Error updating count:", error);
+        }
+      });
+
+      xhr.addEventListener("error", () => {
+        console.log("Download failed");
+      });
+
+      xhr.addEventListener("abort", () => {
+        console.log("Download cancelled");
+      });
+
+      xhr.open("GET", pinDetails?.image.asset?.url);
+      xhr.send();
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${pinDetails?.title || "image"}.${
+        blob.type.split("/")[1]
+      }`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading:", error);
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -65,13 +239,17 @@ const PinDetails = ({ user }) => {
                 <button className="p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all">
                   <RiPlayListAddLine className="w-5 h-5" />
                 </button>
-                <a
-                  href={`${pinDetails?.image.asset?.url}?dl=`}
-                  download
-                  className="p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all"
+                <button
+                  onClick={handleDownload}
+                  disabled={isDownloading}
+                  className="cursor-pointer p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all disabled:opacity-50"
                 >
-                  <HiOutlineDownload className="w-5 h-5" />
-                </a>
+                  {isDownloading ? (
+                    <TbLoader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <HiOutlineDownload className="w-5 h-5" />
+                  )}
+                </button>
               </div>
             </div>
 
@@ -87,15 +265,19 @@ const PinDetails = ({ user }) => {
                     <div className="mt-4 flex items-center gap-6 text-gray-500">
                       <span className="flex items-center gap-1">
                         <AiOutlineLike className="w-5 h-5" />
-                        {pinDetails?.likes || 0}
+                        {pinDetails?.likesCount || 0}
                       </span>
                       <span className="flex items-center gap-1">
                         <AiOutlineDislike className="w-5 h-5" />
-                        {pinDetails?.dislikes || 0}
+                        {pinDetails?.dislikesCount || 0}
                       </span>
                       <span className="flex items-center gap-1">
                         <RiShareForwardLine className="w-5 h-5" />
-                        {pinDetails?.shares || 0}
+                        {pinDetails?.sharesCount || 0}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <HiOutlineDownload className="w-5 h-5" />
+                        {pinDetails?.downloadCount || 0}
                       </span>
                     </div>
                   </div>
@@ -153,16 +335,51 @@ const PinDetails = ({ user }) => {
                   {/* Action Buttons */}
                   <div className="flex items-center gap-3 self-stretch">
                     <div className="flex rounded-xl bg-gray-100 divide-x divide-gray-200">
-                      <button className="px-4 py-2.5 flex items-center gap-2 hover:bg-gray-200 transition-colors rounded-l-xl">
-                        <AiOutlineLike className="w-5 h-5" />
+                      <button
+                        onClick={handleLike}
+                        disabled={isLiking}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-l-xl transition-all cursor-pointer ${
+                          hasLiked
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-100 hover:bg-gray-200 "
+                        }`}
+                      >
+                        {isLiking ? (
+                          <TbLoader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                          <AiOutlineLike
+                            className={`w-5 h-5 ${
+                              hasLiked ? "fill-current" : ""
+                            }`}
+                          />
+                        )}
                       </button>
-                      <button className="px-4 py-2.5 flex items-center gap-2 hover:bg-gray-200 transition-colors rounded-r-xl">
-                        <AiOutlineDislike className="w-5 h-5" />
+                      <button
+                        onClick={handleDislike}
+                        disabled={isDisliking}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-r-xl transition-all cursor-pointer ${
+                          hasDisliked
+                            ? "bg-red-500 text-white"
+                            : "bg-gray-100 hover:bg-gray-200"
+                        }`}
+                      >
+                        {isDisliking ? (
+                          <TbLoader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                          <AiOutlineDislike
+                            className={`w-5 h-5 ${
+                              hasDisliked ? "fill-current" : ""
+                            }`}
+                          />
+                        )}
                       </button>
                     </div>
 
                     <div className="flex items-center gap-3 ml-auto">
-                      <button className="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition-all hover:shadow-md">
+                      <button
+                        className="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition-all hover:shadow-md cursor-pointer"
+                        onClick={handleShare}
+                      >
                         <RiShareForwardLine className="w-5 h-5" />
                       </button>
 
