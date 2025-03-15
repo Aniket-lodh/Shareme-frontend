@@ -3,8 +3,8 @@ import { Routes, Route, useSearchParams, useLocation } from "react-router-dom";
 import { Navbar, Feed, PinDetails, CreatePin, Search } from "../components";
 
 const Pins = ({ user }) => {
-  const [searchItem, setSearchItem] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
+  const [searchItem, setSearchItem] = useState("");
   const location = useLocation();
   
   useEffect(() => {

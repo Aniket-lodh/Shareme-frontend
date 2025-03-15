@@ -1,49 +1,40 @@
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, useNavigate} from "react-router-dom";
 import { IoMdAdd, IoMdSearch } from "react-icons/io";
-import { memo, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-const Navbar = ({ setSearchTerm, user }) => {
+const Navbar = ({ searchTerm, setSearchTerm, user }) => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const location = useLocation();
+  const [localSearchTerm, setLocalSearchTerm] = useState("");
 
-  const debounceSearch = useCallback((callback, delay = 500) => {
+  // Create debounce utility
+  const debounce = (callback, delay) => {
     let timeoutId;
     return (...args) => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => callback(...args), delay);
     };
-  }, []);
-
-  const handleSearch = useCallback(
-    debounceSearch((value) => {
+  };
+  const debouncedSearch = useCallback(
+    debounce((value) => {
       if (value) {
+        setSearchTerm(value);
         navigate(`/search?query=${value}`);
       } else {
-        setSearchParams({});
+        setLocalSearchTerm("");
+        setSearchTerm("");
       }
-      setSearchTerm(value);
-    }),
-    [navigate, setSearchParams, setSearchTerm]
+    }, 500),
+    [setSearchTerm]
   );
 
-  // Sync URL params with search term on mount
-  useEffect(() => {
-    // Clear search when not on search page
-    if (!location.pathname.includes("/search")) {
-      setSearchTerm("");
-      setSearchParams({});
-    } else {
-      const searchQuery = searchParams.get("query") || "";
-      setSearchTerm(searchQuery);
-    }
-  }, [location.pathname, searchParams, setSearchParams]);
+  const handleSearch = (value) => {
+    setLocalSearchTerm(value);
+    debouncedSearch(value);
+  };
 
+  useEffect(() => {
+    if (searchTerm !== localSearchTerm) setLocalSearchTerm(searchTerm);
+  }, [searchTerm]);
   return (
     <nav className="sticky top-0 z-10 bg-white/80 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -54,7 +45,7 @@ const Navbar = ({ setSearchTerm, user }) => {
             </div>
             <input
               type="text"
-              defaultValue={searchParams.get("query") || ""}
+              value={localSearchTerm}
               onChange={(e) => handleSearch(e.target.value)}
               className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparenttransition-shadow duration-200"
               placeholder="Search for amazing content..."
