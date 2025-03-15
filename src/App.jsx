@@ -1,13 +1,16 @@
 import "./App.css";
-import Login from "./components/Login";
-import Home from "./container/Home";
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { fetchUser } from "./utils/fetchUser";
-import { ToastProvider } from './context/Toast';
+import { ToastProvider } from "./context/Toast";
 import { Toaster } from "react-hot-toast";
-import { config } from './utils/variables';
+import { config } from "./utils/variables";
+import { DotSpinner } from "./components/Spinner";
+
+// Lazy load components
+const Login = lazy(() => import("./components/Login"));
+const Home = lazy(() => import("./container/Home"));
 
 function App() {
   const navigate = useNavigate();
@@ -38,10 +41,18 @@ function App() {
             },
           }}
         />
-        <Routes>
-          <Route path="*" element={<Home />} />
-          <Route path="login" element={<Login />} />
-        </Routes>
+        <Suspense
+          fallback={
+            <div className="h-screen flex items-center justify-center">
+              <DotSpinner message="Loading..." />
+            </div>
+          }
+        >
+          <Routes>
+            <Route path="*" element={<Home />} />
+            <Route path="login" element={<Login />} />
+          </Routes>
+        </Suspense>
       </ToastProvider>
     </GoogleOAuthProvider>
   );

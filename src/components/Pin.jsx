@@ -177,5 +177,4 @@ const Pin = ({ pin }) => {
   );
 };
 
-Pin.displayName = "Pin";
 export default Pin;

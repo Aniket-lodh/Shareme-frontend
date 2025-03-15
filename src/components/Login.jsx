@@ -81,4 +81,4 @@ const Login = () => {
   );
 };
 
-export default memo(Login);
+export default Login;

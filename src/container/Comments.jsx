@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import CommentsList from "../components/commentsList";
 import { BiSend } from "react-icons/bi";
-import Spinner, { Loader } from "../components/Spinner.jsx";
+import Spinner from "../components/Spinner.jsx";
 import { client } from "../utils/client.js";
 import { getCommentsQuery } from "../utils/data";
 import { TbLoader2 } from "react-icons/tb";

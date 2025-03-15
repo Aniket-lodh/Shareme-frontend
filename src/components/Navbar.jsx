@@ -92,4 +92,4 @@ const Navbar = ({ setSearchTerm, user }) => {
   );
 };
 
-export default memo(Navbar);
+export default Navbar;

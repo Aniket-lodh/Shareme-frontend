@@ -1,0 +1,61 @@
+TODO List for ShareMe Frontend:
+
+Authentication:
+- [ ] Implement proper error handling for Google OAuth
+- [ ] Add loading states during authentication
+- [ ] Add session persistence
+- [ ] Implement logout confirmation
+
+Pins:
+- [ ] Add pin like/dislike functionality
+- [ ] Implement pin sharing feature
+- [ ] Add pin save to collection feature
+- [ ] Add pin report functionality
+- [ ] Implement infinite scroll for pins feed
+- [ ] Add pin zoom view
+- [ ] Add pin download progress indicator
+- [ ] Implement pin edit functionality
+- [ ] Add pin privacy settings
+
+Comments:
+- [ ] Add comment edit functionality
+- [ ] Add comment reply feature 
+- [ ] Add comment reactions
+- [ ] Implement comment pagination
+- [ ] Add comment notifications
+
+Search:
+- [ ] Improve search suggestions
+- [ ] Add search history
+- [ ] Implement search filters
+- [ ] Add category-based search
+
+User Profile:
+- [ ] Add profile edit functionality
+- [ ] Implement user collections
+- [ ] Add following/followers list
+- [ ] Add user activity feed
+- [ ] Implement user settings page
+- [ ] Add profile privacy settings
+
+UI/UX:
+- [ ] Add proper loading skeletons
+- [ ] Implement proper error boundaries
+- [ ] Add toast notifications
+- [ ] Improve mobile responsiveness
+- [ ] Add dark mode support
+- [ ] Implement proper animations
+- [ ] Add keyboard shortcuts
+
+Performance:
+- [ ] Implement image lazy loading
+- [ ] Add proper caching
+- [ ] Optimize bundle size
+- [ ] Add offline support
+- [ ] Implement proper rate limiting
+
+Testing:
+- [ ] Add unit tests
+- [ ] Add integration tests
+- [ ] Add E2E tests
+- [ ] Implement test coverage reporting
