@@ -22,9 +22,13 @@ const Pin = ({ pin }) => {
 
   const savePin = useCallback(
     async (id) => {
-      if (!alreadySaved && !savingPin) {
-        try {
-          setSavingPin(true);
+      if (savingPin) return;
+
+      try {
+        setSavingPin(true);
+
+        if (!alreadySaved) {
+          // Save pin
           await client
             .patch(id)
             .setIfMissing({ wishlists: [] })
@@ -36,12 +40,18 @@ const Pin = ({ pin }) => {
               },
             ])
             .commit();
-          window.location.reload();
-        } catch (error) {
-          console.error("Error saving pin:", error);
-        } finally {
-          setSavingPin(false);
+        } else {
+          // Unsave pin
+          await client
+            .patch(id)
+            .unset([`wishlists[_ref=="${userId}"]`])
+            .commit();
         }
+        window.location.reload();
+      } catch (error) {
+        console.error("Error saving/unsaving pin:", error);
+      } finally {
+        setSavingPin(false);
       }
     },
     [alreadySaved, savingPin, userId]
@@ -96,7 +106,7 @@ const Pin = ({ pin }) => {
                   e.stopPropagation();
                   savePin(_id);
                 }}
-                disabled={savingPin || alreadySaved}
+                disabled={savingPin}
                 className={`relative flex items-center justify-center gap-2 rounded-full px-2 py-2 shadow-lg backdrop-blur-sm transition-all ${
                   alreadySaved
                     ? "bg-red-500 text-white hover:bg-red-600"
@@ -116,7 +126,7 @@ const Pin = ({ pin }) => {
                   <LuHeart className="h-4 w-4" />
                 )}
                 <span className="absolute w-fit h-fit mr-1 right-full px-2 py-1 bg-black/75 text-white text-xs rounded opacity-0 group-hover/save:opacity-100 transition-opacity whitespace-nowrap">
-                  {savingPin ? "Saving..." : alreadySaved ? "Saved" : "Save"}
+                  {savingPin ? "Saving..." : alreadySaved ? "Unsave" : "Save"}
                 </span>
               </button>
             </div>

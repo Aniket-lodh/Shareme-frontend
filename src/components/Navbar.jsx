@@ -53,7 +53,7 @@ const Navbar = ({ searchTerm, setSearchTerm, user }) => {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-4 ml-4  max-w-2xl border border-red-500">
+          <div className="flex items-center gap-4 ml-4  max-w-2xl">
             <Link
               to="create-pin"
               className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-xl shadow-sm text-white bg-black hover:bg-gray-800 transition-colors duration-200"

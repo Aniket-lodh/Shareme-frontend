@@ -67,7 +67,7 @@ export const categories = [
 ];
 
 /**
- *Takes logged in userId as Params.
+ * Takes logged in userId as Params.
  * @param userId String
  * @returns query
  */
@@ -76,8 +76,11 @@ export const userQuery = (userId) => {
   return query;
 };
 
-export const searchQuery = (searchTerm) => {
-  const query = `*[_type == 'pins' && ( title match '${searchTerm}*' || category match '${searchTerm}*' || about match '${searchTerm}*' )]{
+export const searchQuery = (searchTerm, tab = "pins") => {
+  let query = ``;
+
+  if (tab === "pins") {
+    query = `*[_type == 'pins' && ( title match '${searchTerm}*' || about match '${searchTerm}*' )]{
     image {
       asset -> {
         url
@@ -85,15 +88,41 @@ export const searchQuery = (searchTerm) => {
     },
     _id,
     destination,
-    postedBy -> {
-      _id,
-      name,
-      image
-    },
+    postedBy -> { _id, name, image },
     wishlists[] -> {
      _id,
     },
-  }`;
+    _createdAt
+    }`;
+  } else if (tab === "accounts") {
+    query = `*[_type == 'user' && ( name match '*${searchTerm}*' )]{
+      name,
+      image {
+        asset -> {
+          url
+        }
+      },
+      _id,
+      _createdAt
+      }`;
+  }
+  // const query = `*[_type == 'pins' && ( title match '${searchTerm}*' || category match '${searchTerm}*' || about match '${searchTerm}*' )]{
+  //   image {
+  //     asset -> {
+  //       url
+  //     }
+  //   },
+  //   _id,
+  //   destination,
+  //   postedBy -> {
+  //     _id,
+  //     name,
+  //     image
+  //   },
+  // wishlists[] -> {
+  //  _id,
+  // },
+  // }`;
 
   return query;
 };
